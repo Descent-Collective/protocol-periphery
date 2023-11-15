@@ -167,6 +167,30 @@ contract VaultGetters {
         return (_vault.depositedCollateral, _vault.borrowedAmount, _accruedFees);
     }
 
+    /**
+     * @dev returns a the relevant info for a collateral
+     */
+    function getCollateralInfo(Vault _vaultContract, ERC20 _collateralToken)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256)
+    {
+        IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
+
+        uint256 _rate = _collateral.rateInfo.rate;
+        uint256 _minDeposit = _collateral.collateralFloorPerPosition;
+
+        return (
+            _collateral.totalDepositedCollateral,
+            _collateral.totalBorrowedAmount,
+            _collateral.liquidationThreshold,
+            _collateral.debtCeiling,
+            _rate,
+            _minDeposit,
+            _collateral.price
+        );
+    }
+
     // ------------------------------------------------ INTERNAL FUNCTIONS ------------------------------------------------
 
     function _checkHealthFactor(IVault.VaultInfo memory _vault, IVault.CollateralInfo memory _collateral)
