@@ -1,66 +1,43 @@
-## Foundry
+## Protocol Periphery
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+### Deployment address
 
-Foundry consists of:
+#### Base Georli
+| Contract Name  | Addresses |
+| ------------- | ------------- |
+| MultiStaticCall Contract | 0x5d0583Ef20884C0b175046d515Ec227200C12C89  |
+| VaultGetters Contract  | 0x18196CCaA8C2844c82B40a8bDCa27349C7466280  |
+| VaultRouter Contract  | 0x94D80B2EA3cda86bF350DD7860e1171701F284c8  |
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-## Documentation
+To install libraries needed, run:
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```zsh
+forge install
 ```
 
-### Test
+To run tests, run:
 
-```shell
-$ forge test
+```zsh
+forge test -vvv --gas-report
 ```
 
-### Format
+To run slither, run:
 
-```shell
-$ forge fmt
+```zsh
+slither .
 ```
 
-### Gas Snapshots
+To start a local node, run:
 
-```shell
-$ forge snapshot
+```zsh
+anvil
 ```
 
-### Anvil
+To run deploy the deploy script, (be sure to have the parameters in `./deployParameters.json` needed for your script populated and also have an anvil instance running), run:
 
-```shell
-$ anvil
+```zsh
+forge script script/deploy.s.sol:DeploymentScript --fork-url http://localhost:8545 --broadcast
 ```
 
-### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```

@@ -11,7 +11,7 @@ contract DeploymentScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // MultiStaticcall multiStaticCallContract = new MultiStaticcall();
+        MultiStaticcall multiStaticCallContract = new MultiStaticcall();
         VaultGetters vaultGettersContract = new VaultGetters();
         VaultRouter vaultRouterContract = new VaultRouter();
 
