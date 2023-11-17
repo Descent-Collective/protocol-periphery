@@ -7,13 +7,20 @@ import {VaultGetters} from "../src/vaultGetters.sol";
 import {VaultRouter} from "../src/vaultRouter.sol";
 
 contract DeploymentScript is Script {
-    function run() public {
+    function run()
+        public
+        returns (
+            MultiStaticcall multiStaticCallContract,
+            VaultGetters vaultGettersContract,
+            VaultRouter vaultRouterContract
+        )
+    {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        MultiStaticcall multiStaticCallContract = new MultiStaticcall();
-        VaultGetters vaultGettersContract = new VaultGetters();
-        VaultRouter vaultRouterContract = new VaultRouter();
+        multiStaticCallContract = new MultiStaticcall();
+        vaultGettersContract = new VaultGetters();
+        vaultRouterContract = new VaultRouter();
 
         vm.stopBroadcast();
     }

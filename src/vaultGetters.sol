@@ -210,10 +210,9 @@ contract VaultGetters {
 
         uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_vault, _collateral);
 
-        uint256 _adjustedCollateralValueInCurrency =
-            (_collateralValueInCurrency * _collateral.liquidationThreshold) / PRECISION;
+        uint256 _adjustedCollateralValueInCurrency = _collateralValueInCurrency * _collateral.liquidationThreshold;
 
-        return (_adjustedCollateralValueInCurrency * PRECISION) / _totalUserDebt;
+        return _adjustedCollateralValueInCurrency / _totalUserDebt;
     }
 
     function _getCurrencyValueOfCollateral(IVault.VaultInfo memory _vault, IVault.CollateralInfo memory _collateral)

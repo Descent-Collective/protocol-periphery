@@ -2,11 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
-remappings = [
-    "@openzeppelin/=lib/protocol-core/lib/openzeppelin-contracts/",
-    "descent-collective/protocol-core/=lib/protocol-core/src/",
-    "forge-std/=lib/forge-std/src/",
-]
+
 [rpc_endpoints]
 base_georli = "${BASE_RPC_URL}"
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
