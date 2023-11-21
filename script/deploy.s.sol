@@ -1,27 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity 0.8.21;
 
-import {Script, console2} from "forge-std/Script.sol";
 import {MultiStaticcall} from "../src/mutliStaticcall.sol";
 import {VaultGetters} from "../src/vaultGetters.sol";
 import {VaultRouter} from "../src/vaultRouter.sol";
 
-contract DeploymentScript is Script {
+import {BaseScript, stdJson, console2} from "./base.s.sol";
+
+contract DeployScript is BaseScript {
+    using stdJson for string;
+
     function run()
-        public
-        returns (
-            MultiStaticcall multiStaticCallContract,
-            VaultGetters vaultGettersContract,
-            VaultRouter vaultRouterContract
-        )
+        external
+        broadcast
+        returns (MultiStaticcall multiStaticcall, VaultGetters vaultGetters, VaultRouter vaultRouters)
     {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
-
-        multiStaticCallContract = new MultiStaticcall();
-        vaultGettersContract = new VaultGetters();
-        vaultRouterContract = new VaultRouter();
-
-        vm.stopBroadcast();
+        multiStaticcall = new MultiStaticcall();
+        vaultGetters = new VaultGetters();
+        vaultRouters = new VaultRouter();
     }
 }
