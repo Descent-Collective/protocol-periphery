@@ -63,10 +63,6 @@ Provide a brief overview of the purpose of this release and any critical informa
 
 Provide instructions on how to install the latest release or upgrade from a previous version. Include any dependencies or system requirements.
 
-## Compatibility
-
-Specify the compatibility of this release with different environments, platforms, or dependencies. Highlight any breaking changes that may affect existing installations.
-
 ## Testing
 
 Describe the testing process followed for this release, including unit tests, integration tests, and any other relevant testing procedures.
