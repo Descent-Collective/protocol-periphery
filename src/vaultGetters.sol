@@ -111,10 +111,17 @@ contract VaultGetters {
         (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _vault, _collateral);
         uint256 _borrowedAmount = _vault.borrowedAmount + _vault.accruedFees + _currentAccruedFees;
 
+        int256 maxBorrowableAmount = int256(_adjustedCollateralValueInCurrency) - int256(_borrowedAmount);
+
+        // if maxBorrowable amount is positive (i.e user can still borrow and not in debt) and max borrowable amount is greater than debt ceiling, return debt ceiling as that is what's actually borrowable
+        if (maxBorrowableAmount > 0 && int256(_collateral.debtCeiling) < maxBorrowableAmount) {
+            maxBorrowableAmount = int256(_collateral.debtCeiling);
+        }
+
         // return the result minus already taken collateral.
         // this can be negative if health factor is below 1e18.
         // caller should know that if the result is negative then borrowing / removing collateral will fail
-        return int256(_adjustedCollateralValueInCurrency) - int256(_borrowedAmount);
+        return maxBorrowableAmount;
     }
 
     /**
