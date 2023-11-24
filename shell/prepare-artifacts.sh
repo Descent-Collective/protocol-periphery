@@ -1,17 +1,14 @@
 # Delete the current artifacts
-artifacts=./artifacts
-rm -rf $artifacts
+abis=./abis
+rm -rf $abis
 
 # Create the new artifacts directories
-mkdir $artifacts \
+mkdir $abis \
 
 # Generate the artifacts with Forge
 FOUNDRY_PROFILE=optimized forge build
 
-# Copy the production artifacts
-cp out-optimized/multiStaticcall.sol/multiStaticcall.json $artifacts
-cp out-optimized/vaultGetters.sol/vaultGetters.json $artifacts
-cp out-optimized/vaultRouter.sol/vaultRouter.json $artifacts
-
-# Format the artifacts with Prettier
-pnpm prettier --write ./artifacts
+# Copy the production abis
+cp out/multiStaticcall.sol/MultiStaticcall.json $abis
+cp out/vaultGetters.sol/VaultGetters.json $abis
+cp out/src/vaultRouter.sol/VaultRouter.json $abis
