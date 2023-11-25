@@ -13,7 +13,5 @@ Solidity compiler: [0.8.21]
 
 ## Changes
 
-### Bugfixes
-
 #### consider `debtCeiling` when calculating `max_borrowable_amount`
 Before now, debtCeiling wasn't considered when calculating `max_borrowable_amount` but instead we were just using the value of the max collateral taken.
