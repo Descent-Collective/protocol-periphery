@@ -94,7 +94,7 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        if (!_collateral.exists) return PRECISION;
+        if (!_collateral.exists) return 0;
 
         return _getCollateralRatio(_collateral, _vault);
     }
