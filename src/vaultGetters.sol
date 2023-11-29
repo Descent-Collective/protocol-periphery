@@ -23,6 +23,12 @@ contract VaultGetters {
         return IVault.VaultInfo(depositedCollateral, borrowedAmount, accruedFees, lastTotalAccumulatedRate);
     }
 
+    function _getBaseRateInfo(Vault _vaultContract) private view returns (IVault.RateInfo memory) {
+        (uint256 rate, uint256 accumulatedRate, uint256 lastUpdateTime) = _vaultContract.baseRateInfo();
+
+        return IVault.RateInfo(rate, accumulatedRate, lastUpdateTime);
+    }
+
     function _getCollateralMapping(Vault _vaultContract, ERC20 _collateralToken)
         private
         view
@@ -60,9 +66,27 @@ contract VaultGetters {
     // ------------------------------------------------ GETTERS ------------------------------------------------
 
     /**
-     * @dev returns health factor of a vault
+     * @dev returns health factor (if a vault is liquidatable or not) of a vault
      */
-    function checkHealthFactor(Vault _vaultContract, ERC20 _collateralToken, address _owner)
+    function getHealthFactor(Vault _vaultContract, ERC20 _collateralToken, address _owner)
+        external
+        view
+        returns (bool)
+    {
+        IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
+        IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
+
+        if (!_collateral.exists) return true;
+
+        uint256 _collateralRatio = _getCollateralRatio(_collateral, _vault);
+
+        return _collateralRatio <= _collateral.liquidationThreshold;
+    }
+
+    /**
+     * @dev returns the collateral ratio of a vault
+     */
+    function getCollateralRatio(Vault _vaultContract, ERC20 _collateralToken, address _owner)
         external
         view
         returns (uint256)
@@ -70,19 +94,9 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        if (!_collateral.exists) return PRECISION;
+        if (!_collateral.exists) return 0;
 
-        // prevent division by 0 revert below
-        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _vault, _collateral);
-        uint256 _totalUserDebt = _vault.borrowedAmount + _currentAccruedFees;
-        if (_totalUserDebt == 0) return type(uint256).max;
-
-        uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_vault, _collateral);
-
-        uint256 _adjustedCollateralValueInCurrency =
-            (_collateralValueInCurrency * _collateral.liquidationThreshold) / PRECISION;
-
-        return (_adjustedCollateralValueInCurrency * PRECISION) / _totalUserDebt;
+        return _getCollateralRatio(_collateral, _vault);
     }
 
     /**
@@ -101,14 +115,14 @@ contract VaultGetters {
         if (_vault.depositedCollateral == 0 || !_collateral.exists) return 0;
 
         // get value of collateral
-        uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_vault, _collateral);
+        uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_collateral, _vault);
 
         // adjust this to consider liquidation ratio
         uint256 _adjustedCollateralValueInCurrency =
             (_collateralValueInCurrency * _collateral.liquidationThreshold) / PRECISION;
 
         // account for accrued fees
-        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _vault, _collateral);
+        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
         uint256 _borrowedAmount = _vault.borrowedAmount + _vault.accruedFees + _currentAccruedFees;
 
         int256 maxBorrowableAmount = int256(_adjustedCollateralValueInCurrency) - int256(_borrowedAmount);
@@ -140,7 +154,7 @@ contract VaultGetters {
         if (!_collateral.exists) return 0;
 
         // account for accrued fees
-        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _vault, _collateral);
+        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
         uint256 _borrowedAmount = _vault.borrowedAmount + _vault.accruedFees + _currentAccruedFees;
 
         // get cyrrency equivalent of borrowed currency
@@ -166,7 +180,7 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
         // account for accrued fees
-        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _vault, _collateral);
+        (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
         uint256 _accruedFees = _vault.accruedFees + _currentAccruedFees;
 
         return (_vault.depositedCollateral, _vault.borrowedAmount, _accruedFees);
@@ -196,9 +210,20 @@ contract VaultGetters {
         );
     }
 
+    /**
+     * @dev returns if
+     */
+    function isReliedUpon(Vault _vaultContract, address _owner, address _reliedUpon) external view returns (bool) {
+        return _vaultContract.relyMapping(_owner, _reliedUpon);
+    }
+
     // ------------------------------------------------ INTERNAL FUNCTIONS ------------------------------------------------
 
-    function _checkHealthFactor(IVault.VaultInfo memory _vault, IVault.CollateralInfo memory _collateral)
+    /**
+     * @dev returns the collateral ratio of a vault where anything below 1e18 is liquidatable
+     * @dev should never revert!
+     */
+    function _getCollateralRatio(IVault.CollateralInfo memory _collateral, IVault.VaultInfo memory _vault)
         internal
         pure
         returns (uint256)
@@ -211,16 +236,20 @@ contract VaultGetters {
 
         // prevent division by 0 revert below
         uint256 _totalUserDebt = _vault.borrowedAmount + _vault.accruedFees;
-        if (_totalUserDebt == 0) return type(uint256).max;
+        if (_totalUserDebt == 0) return 0;
 
-        uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_vault, _collateral);
+        // _collateralValueInCurrency: divDown (solidity default) since _collateralValueInCurrency is denominator
+        uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_collateral, _vault);
 
-        uint256 _adjustedCollateralValueInCurrency = _collateralValueInCurrency * _collateral.liquidationThreshold;
-
-        return _adjustedCollateralValueInCurrency / _totalUserDebt;
+        // divUp as this benefits the protocol
+        return _divUp((_totalUserDebt * PRECISION), _collateralValueInCurrency);
     }
 
-    function _getCurrencyValueOfCollateral(IVault.VaultInfo memory _vault, IVault.CollateralInfo memory _collateral)
+    /**
+     * @dev returns the conversion of a vaults deposited collateral to the vault's currency
+     * @dev should never revert!
+     */
+    function _getCurrencyValueOfCollateral(IVault.CollateralInfo memory _collateral, IVault.VaultInfo memory _vault)
         internal
         pure
         returns (uint256)
@@ -232,6 +261,10 @@ contract VaultGetters {
         return _currencyValueOfCollateral;
     }
 
+    /**
+     * @dev returns the conversion of an amount of currency to a given supported collateral
+     * @dev should never revert!
+     */
     function _getCollateralAmountFromCurrencyValue(IVault.CollateralInfo memory _collateral, uint256 _amount)
         internal
         pure
@@ -244,10 +277,14 @@ contract VaultGetters {
         return _collateralAmountOfCurrencyValue;
     }
 
+    /**
+     * @dev returns the fees accrued by a user's vault since `_vault.lastUpdateTime`
+     * @dev should never revert!
+     */
     function _calculateAccruedFees(
         Vault _vaultContract,
-        IVault.VaultInfo memory _vault,
-        IVault.CollateralInfo memory _collateral
+        IVault.CollateralInfo memory _collateral,
+        IVault.VaultInfo memory _vault
     ) internal view returns (uint256, uint256) {
         uint256 _totalCurrentAccumulatedRate = _calculateCurrentTotalAccumulatedRate(_vaultContract, _collateral);
 
@@ -257,6 +294,10 @@ contract VaultGetters {
         return (_accruedFees, _totalCurrentAccumulatedRate);
     }
 
+    /**
+     * @dev returns the current total accumulated rate i.e current accumulated base rate + current accumulated collateral rate of the given collateral
+     * @dev should never revert!
+     */
     function _calculateCurrentTotalAccumulatedRate(Vault _vaultContract, IVault.CollateralInfo memory _collateral)
         internal
         view
@@ -266,19 +307,38 @@ contract VaultGetters {
         uint256 _collateralCurrentAccumulatedRate = _collateral.rateInfo.accumulatedRate
             + (_collateral.rateInfo.rate * (block.timestamp - _collateral.rateInfo.lastUpdateTime));
 
+        IVault.RateInfo memory _baseRateInfo = _getBaseRateInfo(_vaultContract);
+
         // calculates pending base rate and adds it to the last stored base rate
-        (uint256 _rate, uint256 _accumulatedRate, uint256 _lastUpdateTime) = _vaultContract.baseRateInfo();
-        uint256 _baseCurrentAccumulatedRate = _accumulatedRate + (_rate * (block.timestamp - _lastUpdateTime));
+        uint256 _baseCurrentAccumulatedRate =
+            _baseRateInfo.accumulatedRate + (_baseRateInfo.rate * (block.timestamp - _baseRateInfo.lastUpdateTime));
 
         // adds together to get total rate since inception
         return _collateralCurrentAccumulatedRate + _baseCurrentAccumulatedRate;
     }
 
+    /**
+     * @dev scales a given collateral to be represented in 1e18
+     * @dev should never revert!
+     */
     function _scaleCollateralToExpectedPrecision(IVault.CollateralInfo memory _collateral, uint256 amount)
         internal
         pure
         returns (uint256)
     {
         return amount * (10 ** _collateral.additionalCollateralPercision);
+    }
+
+    /**
+     * @dev divides `_a` by `_b` and rounds the result `_c` up to the next whole number
+     *
+     * @dev if `_a` is 0, return 0 early as it will revert with underflow error when calculating divUp below
+     * @dev reverts if `_b` is 0
+     */
+    function _divUp(uint256 _a, uint256 _b) private pure returns (uint256 _c) {
+        if (_b == 0) revert();
+        if (_a == 0) return 0;
+
+        _c = 1 + ((_a - 1) / _b);
     }
 }
