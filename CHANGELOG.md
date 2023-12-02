@@ -15,3 +15,18 @@ Solidity compiler: [0.8.21]
 
 #### consider `debtCeiling` when calculating `max_borrowable_amount`
 Before now, debtCeiling wasn't considered when calculating `max_borrowable_amount` but instead we were just using the value of the max collateral taken.
+
+# Version 0.1.1
+
+## Compiler settings
+
+Solidity compiler: [0.8.21]
+
+### contracts
+- MultiStaticCall Contract: `0xB8747e5cce01AA5a51021989BA11aE33097db485`
+- VaultGetters Contract:    `0x3d35807343CbF4fDb16E42297F2214f62848D032`
+- VaultRouter Contract     `0xFBD26B871D55ba56B7a780eF1fF243Db7A3E81f4`
+
+## Changes
+- Add getter for collateral ratio
+- Change get factor to return a boolean
