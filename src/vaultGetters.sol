@@ -270,11 +270,10 @@ contract VaultGetters {
         pure
         returns (uint256)
     {
-        uint256 _collateralAmountOfCurrencyValue = (
-            _scaleCollateralToExpectedPrecision(_collateral, _amount) * PRECISION
-        ) / (_collateral.price * ADDITIONAL_FEED_PRECISION);
+        uint256 _collateralAmountOfCurrencyValue =
+            _divUp((_amount * PRECISION), (_collateral.price * ADDITIONAL_FEED_PRECISION));
 
-        return _collateralAmountOfCurrencyValue;
+        return _divUp(_collateralAmountOfCurrencyValue, 10 ** _collateral.additionalCollateralPrecision);
     }
 
     /**
@@ -326,7 +325,7 @@ contract VaultGetters {
         pure
         returns (uint256)
     {
-        return amount * (10 ** _collateral.additionalCollateralPercision);
+        return amount * (10 ** _collateral.additionalCollateralPrecision);
     }
 
     /**

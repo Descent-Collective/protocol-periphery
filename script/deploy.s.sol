@@ -4,12 +4,9 @@ pragma solidity 0.8.21;
 import {MultiStaticcall} from "../src/multiStaticcall.sol";
 import {VaultGetters} from "../src/vaultGetters.sol";
 import {VaultRouter} from "../src/vaultRouter.sol";
-
-import {BaseScript, stdJson, console2} from "./base.s.sol";
+import {BaseScript} from "./base.s.sol";
 
 contract DeployScript is BaseScript {
-    using stdJson for string;
-
     function run()
         external
         broadcast
