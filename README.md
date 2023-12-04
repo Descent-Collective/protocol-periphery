@@ -37,5 +37,5 @@ anvil
 To run deploy the deploy script, run:
 
 ```zsh
-forge script script/deploy.s.sol:DeploymentScript --fork-url http://localhost:8545 --broadcast
+forge script script/deploy.s.sol:DeployScript --fork-url http://localhost:8545 --broadcast
 ```
