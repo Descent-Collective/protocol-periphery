@@ -128,7 +128,8 @@ contract VaultGetters {
         int256 maxBorrowableAmount = int256(_adjustedCollateralValueInCurrency) - int256(_borrowedAmount);
 
         // if maxBorrowable amount is positive (i.e user can still borrow and not in debt) and max borrowable amount is greater than debt ceiling, return debt ceiling as that is what's actually borrowable
-        if (maxBorrowableAmount > 0 && int256(_collateral.debtCeiling) < maxBorrowableAmount) {
+        if (maxBorrowableAmount > 0 && _collateral.debtCeiling < uint256(maxBorrowableAmount)) {
+            // at this point it is surely going not overflow when casting into int256 because of the check above
             maxBorrowableAmount = int256(_collateral.debtCeiling);
         }
 
