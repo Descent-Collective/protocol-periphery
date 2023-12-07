@@ -46,3 +46,17 @@ Solidity compiler: [0.8.21]
 - Fix wrong calculation in withdrawable collateral
 - Fix typos
 - Fix wrong deploy command in readme
+
+# Version 0.1.3
+
+## Compiler settings
+
+Solidity compiler: [0.8.21]
+
+### contracts
+- MultiStaticCall Contract: `0x16d8d245188f80081CC1B55Cd662fe37C26953D3`
+- VaultGetters Contract:    `0x7e2A9d40F4A580cef62D542beF3a7Cf38A13a76A`
+- VaultRouter Contract     `0x3B5137c6f458AfC8Ef02D18Edb213e678e314C54`
+
+## Changes
+- Fix wrong calculation in available currency to borrow
