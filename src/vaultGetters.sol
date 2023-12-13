@@ -78,7 +78,7 @@ contract VaultGetters {
 
         if (!_collateral.exists) return true;
 
-        uint256 _collateralRatio = _getCollateralRatio(_collateral, _vault);
+        uint256 _collateralRatio = _getCollateralRatio(_vaultContract, _collateral, _vault);
 
         return _collateralRatio <= _collateral.liquidationThreshold;
     }
@@ -96,7 +96,7 @@ contract VaultGetters {
 
         if (!_collateral.exists) return 0;
 
-        return _getCollateralRatio(_collateral, _vault);
+        return _getCollateralRatio(_vaultContract, _collateral, _vault);
     }
 
     /**
@@ -163,9 +163,9 @@ contract VaultGetters {
 
         // adjust for liquidation ratio
         uint256 _adjustedCollateralAmountFromCurrencyValue =
-            (_collateralAmountFromCurrencyValue * PRECISION) / _collateral.liquidationThreshold;
+            _divUp((_collateralAmountFromCurrencyValue * PRECISION), _collateral.liquidationThreshold);
 
-        // return diff in depoisted and expected collaeral bal
+        // return diff in deposited and expected collaeral bal
         return int256(_vault.depositedCollateral) - int256(_adjustedCollateralAmountFromCurrencyValue);
     }
 
@@ -197,7 +197,8 @@ contract VaultGetters {
     {
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        uint256 _rate = _collateral.rateInfo.rate;
+        IVault.RateInfo memory _baseRateInfo = _getBaseRateInfo(_vaultContract);
+        uint256 _rate = (_collateral.rateInfo.rate + _baseRateInfo.rate) * 365 days;
         uint256 _minDeposit = _collateral.collateralFloorPerPosition;
 
         return (
@@ -212,7 +213,7 @@ contract VaultGetters {
     }
 
     /**
-     * @dev returns if
+     * @dev returns if _owner has approved _reliedUpon to interact with _owner's vault on their behalf
      */
     function isReliedUpon(Vault _vaultContract, address _owner, address _reliedUpon) external view returns (bool) {
         return _vaultContract.relyMapping(_owner, _reliedUpon);
@@ -224,11 +225,11 @@ contract VaultGetters {
      * @dev returns the collateral ratio of a vault where anything below 1e18 is liquidatable
      * @dev should never revert!
      */
-    function _getCollateralRatio(IVault.CollateralInfo memory _collateral, IVault.VaultInfo memory _vault)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _getCollateralRatio(
+        Vault _vaultContract,
+        IVault.CollateralInfo memory _collateral,
+        IVault.VaultInfo memory _vault
+    ) internal view returns (uint256) {
         // get collateral value in currency
         // get total currency minted
         // if total currency minted == 0, return max uint
@@ -236,7 +237,8 @@ contract VaultGetters {
         // divide by total currency minted to get a value.
 
         // prevent division by 0 revert below
-        uint256 _totalUserDebt = _vault.borrowedAmount + _vault.accruedFees;
+        (uint256 _unaccountedAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
+        uint256 _totalUserDebt = _vault.borrowedAmount + _vault.accruedFees + _unaccountedAccruedFees;
         if (_totalUserDebt == 0) return 0;
 
         // _collateralValueInCurrency: divDown (solidity default) since _collateralValueInCurrency is denominator
