@@ -61,9 +61,9 @@ Solidity compiler: [0.8.21]
 
 ### contracts
 
-- MultiStaticCall Contract: `0x7E04A2380bF7F024Da53e60686f2e0608E987768`
-- VaultGetters Contract: `0x3d8255F39C2DC306C05d2b503e74CCea1fD9F430`
-- VaultRouter Contract `0x2d4D7b224294573d02076cea252CbBD8156A4465`
+- MultiStaticCall Contract: `0x5226c32C94acdd44743FC5c376582d6782FA7592`
+- VaultGetters Contract: `0x63642E2E49922DA2095cFDB0781cFf01a0d69786`
+- VaultRouter Contract `0x7FCF3897429Af4e5f3A397330AD638D819e53328`
 
 ## Changes
 
