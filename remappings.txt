@@ -1,3 +1,4 @@
 @openzeppelin/=lib/protocol-core/lib/openzeppelin-contracts/
 descent-collective/protocol-core/=lib/protocol-core/src/
 forge-std/=lib/forge-std/src/
+permit2/=lib/permit2/src/
