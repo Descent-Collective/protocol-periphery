@@ -6,9 +6,9 @@
 
 | Contract Name            | Addresses                                  |
 | ------------------------ | ------------------------------------------ |
-| MultiStaticCall Contract | 0x16d8d245188f80081CC1B55Cd662fe37C26953D3 |
-| VaultGetters Contract    | 0x7e2A9d40F4A580cef62D542beF3a7Cf38A13a76A |
-| VaultRouter Contract     | 0x3B5137c6f458AfC8Ef02D18Edb213e678e314C54 |
+| MultiStaticCall Contract | 0x5226c32C94acdd44743FC5c376582d6782FA7592 |
+| VaultGetters Contract    | 0x63642E2E49922DA2095cFDB0781cFf01a0d69786 |
+| VaultRouter Contract     | 0x7FCF3897429Af4e5f3A397330AD638D819e53328 |
 
 To install libraries needed, run:
 
