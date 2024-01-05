@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 //  ==========  External imports    ==========
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IVault} from "descent-collective/protocol-core/interfaces/IVault.sol";
-import {Currency} from "descent-collective/protocol-core/currency.sol";
 import {Vault} from "descent-collective/protocol-core/vault.sol";
 
 contract VaultGetters {
