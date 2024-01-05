@@ -126,8 +126,9 @@ contract VaultGetters {
 
         // if maxBorrowable amount is positive (i.e user can still borrow and not in debt) and max borrowable amount is greater than debt ceiling, return debt ceiling as that is what's actually borrowable
         if (maxBorrowableAmount > 0 && _collateral.debtCeiling < uint256(maxBorrowableAmount)) {
+            if (_collateral.debtCeiling > uint256(type(int256).max)) maxBorrowableAmount = type(int256).max;
             // at this point it is surely going not overflow when casting into int256 because of the check above
-            maxBorrowableAmount = int256(_collateral.debtCeiling);
+            else maxBorrowableAmount = int256(_collateral.debtCeiling);
         }
 
         // return the result minus already taken collateral.
@@ -236,7 +237,10 @@ contract VaultGetters {
         // prevent division by 0 revert below
         (uint256 _unaccountedAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
         uint256 _totalUserDebt = _vault.borrowedAmount + _vault.accruedFees + _unaccountedAccruedFees;
+        // if user's debt is 0 return 0
         if (_totalUserDebt == 0) return 0;
+        // if deposited collateral is 0 return type(uint256).max. The condition check above ensures that execution only reaches here if _totalUserDebt > 0
+        if (_vault.depositedCollateral == 0) return type(uint256).max;
 
         // _collateralValueInCurrency: divDown (solidity default) since _collateralValueInCurrency is denominator
         uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_collateral, _vault);
@@ -285,7 +289,9 @@ contract VaultGetters {
         IVault.CollateralInfo memory _collateral,
         IVault.VaultInfo memory _vault
     ) internal view returns (uint256, uint256) {
-        uint256 _totalCurrentAccumulatedRate = _calculateCurrentTotalAccumulatedRate(_vaultContract, _collateral);
+        uint256 _totalCurrentAccumulatedRate = _vaultContract.rateModule().calculateCurrentTotalAccumulatedRate(
+            _getBaseRateInfo(_vaultContract), _collateral.rateInfo
+        );
 
         uint256 _accruedFees = (
             (_totalCurrentAccumulatedRate - _vault.lastTotalAccumulatedRate) * _vault.borrowedAmount
