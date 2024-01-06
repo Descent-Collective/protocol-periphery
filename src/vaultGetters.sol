@@ -4,12 +4,12 @@ pragma solidity 0.8.21;
 //  ==========  External imports    ==========
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IVault} from "descent-collective/protocol-core/interfaces/IVault.sol";
-import {Currency} from "descent-collective/protocol-core/currency.sol";
 import {Vault} from "descent-collective/protocol-core/vault.sol";
 
 contract VaultGetters {
     uint256 private constant PRECISION_DEGREE = 18;
     uint256 private constant PRECISION = 1 * (10 ** PRECISION_DEGREE);
+    uint256 private constant HUNDRED_PERCENTAGE = 100 * (10 ** PRECISION_DEGREE);
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e12;
 
     function _getVaultMapping(Vault _vaultContract, ERC20 _collateralToken, address _owner)
@@ -40,12 +40,10 @@ contract VaultGetters {
             uint256 liquidationThreshold,
             uint256 liquidationBonus,
             Vault.RateInfo memory rateInfo,
-            uint256 paidFees,
             uint256 price,
             uint256 debtCeiling,
             uint256 collateralFloorPerPosition,
-            uint256 additionalCollateralPercision,
-            bool exists
+            uint256 additionalCollateralPercision
         ) = _vaultContract.collateralMapping(_collateralToken);
 
         return IVault.CollateralInfo(
@@ -54,12 +52,10 @@ contract VaultGetters {
             liquidationThreshold,
             liquidationBonus,
             rateInfo,
-            paidFees,
             price,
             debtCeiling,
             collateralFloorPerPosition,
-            additionalCollateralPercision,
-            exists
+            additionalCollateralPercision
         );
     }
 
@@ -76,7 +72,7 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        if (!_collateral.exists) return true;
+        if (_collateral.rateInfo.rate == 0) return true;
 
         uint256 _collateralRatio = _getCollateralRatio(_vaultContract, _collateral, _vault);
 
@@ -94,7 +90,7 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        if (!_collateral.exists) return 0;
+        if (_collateral.rateInfo.rate == 0) return 0;
 
         return _getCollateralRatio(_vaultContract, _collateral, _vault);
     }
@@ -112,14 +108,14 @@ contract VaultGetters {
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
         // if no collateral it should return 0
-        if (_vault.depositedCollateral == 0 || !_collateral.exists) return 0;
+        if (_vault.depositedCollateral == 0 || _collateral.rateInfo.rate == 0) return 0;
 
         // get value of collateral
         uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_collateral, _vault);
 
         // adjust this to consider liquidation ratio
         uint256 _adjustedCollateralValueInCurrency =
-            (_collateralValueInCurrency * _collateral.liquidationThreshold) / PRECISION;
+            (_collateralValueInCurrency * _collateral.liquidationThreshold) / HUNDRED_PERCENTAGE;
 
         // account for accrued fees
         (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
@@ -129,8 +125,9 @@ contract VaultGetters {
 
         // if maxBorrowable amount is positive (i.e user can still borrow and not in debt) and max borrowable amount is greater than debt ceiling, return debt ceiling as that is what's actually borrowable
         if (maxBorrowableAmount > 0 && _collateral.debtCeiling < uint256(maxBorrowableAmount)) {
+            if (_collateral.debtCeiling > uint256(type(int256).max)) maxBorrowableAmount = type(int256).max;
             // at this point it is surely going not overflow when casting into int256 because of the check above
-            maxBorrowableAmount = int256(_collateral.debtCeiling);
+            else maxBorrowableAmount = int256(_collateral.debtCeiling);
         }
 
         // return the result minus already taken collateral.
@@ -152,7 +149,7 @@ contract VaultGetters {
         IVault.VaultInfo memory _vault = _getVaultMapping(_vaultContract, _collateralToken, _owner);
         IVault.CollateralInfo memory _collateral = _getCollateralMapping(_vaultContract, _collateralToken);
 
-        if (!_collateral.exists) return 0;
+        if (_collateral.rateInfo.rate == 0) return 0;
 
         // account for accrued fees
         (uint256 _currentAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
@@ -163,7 +160,7 @@ contract VaultGetters {
 
         // adjust for liquidation ratio
         uint256 _adjustedCollateralAmountFromCurrencyValue =
-            _divUp((_collateralAmountFromCurrencyValue * PRECISION), _collateral.liquidationThreshold);
+            _divUp((_collateralAmountFromCurrencyValue * HUNDRED_PERCENTAGE), _collateral.liquidationThreshold);
 
         // return diff in deposited and expected collaeral bal
         return int256(_vault.depositedCollateral) - int256(_adjustedCollateralAmountFromCurrencyValue);
@@ -239,13 +236,16 @@ contract VaultGetters {
         // prevent division by 0 revert below
         (uint256 _unaccountedAccruedFees,) = _calculateAccruedFees(_vaultContract, _collateral, _vault);
         uint256 _totalUserDebt = _vault.borrowedAmount + _vault.accruedFees + _unaccountedAccruedFees;
+        // if user's debt is 0 return 0
         if (_totalUserDebt == 0) return 0;
+        // if deposited collateral is 0 return type(uint256).max. The condition check above ensures that execution only reaches here if _totalUserDebt > 0
+        if (_vault.depositedCollateral == 0) return type(uint256).max;
 
         // _collateralValueInCurrency: divDown (solidity default) since _collateralValueInCurrency is denominator
         uint256 _collateralValueInCurrency = _getCurrencyValueOfCollateral(_collateral, _vault);
 
         // divUp as this benefits the protocol
-        return _divUp((_totalUserDebt * PRECISION), _collateralValueInCurrency);
+        return _divUp((_totalUserDebt * HUNDRED_PERCENTAGE), _collateralValueInCurrency);
     }
 
     /**
@@ -273,10 +273,10 @@ contract VaultGetters {
         pure
         returns (uint256)
     {
-        uint256 _collateralAmountOfCurrencyValue =
-            _divUp((_amount * PRECISION), (_collateral.price * ADDITIONAL_FEED_PRECISION));
-
-        return _divUp(_collateralAmountOfCurrencyValue, 10 ** _collateral.additionalCollateralPrecision);
+        return _divUp(
+            (_amount * PRECISION),
+            (_collateral.price * ADDITIONAL_FEED_PRECISION * (10 ** _collateral.additionalCollateralPrecision))
+        );
     }
 
     /**
@@ -288,10 +288,13 @@ contract VaultGetters {
         IVault.CollateralInfo memory _collateral,
         IVault.VaultInfo memory _vault
     ) internal view returns (uint256, uint256) {
-        uint256 _totalCurrentAccumulatedRate = _calculateCurrentTotalAccumulatedRate(_vaultContract, _collateral);
+        uint256 _totalCurrentAccumulatedRate = _vaultContract.rateModule().calculateCurrentTotalAccumulatedRate(
+            _getBaseRateInfo(_vaultContract), _collateral.rateInfo
+        );
 
-        uint256 _accruedFees =
-            ((_totalCurrentAccumulatedRate - _vault.lastTotalAccumulatedRate) * _vault.borrowedAmount) / PRECISION;
+        uint256 _accruedFees = (
+            (_totalCurrentAccumulatedRate - _vault.lastTotalAccumulatedRate) * _vault.borrowedAmount
+        ) / HUNDRED_PERCENTAGE;
 
         return (_accruedFees, _totalCurrentAccumulatedRate);
     }
