@@ -47,8 +47,8 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytes memory bytesPackedOperations =
             abi.encodePacked(VaultRouter.Operations.ERC20_TransferFrom, VaultRouter.Operations.DepositCollateral);
         bytes[] memory encodedParameters = new bytes[](2);
-        encodedParameters[0] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()));
-        encodedParameters[1] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[0] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()));
+        encodedParameters[1] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
     }
@@ -71,8 +71,8 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytes memory signature = abi.encodePacked(r, s, v);
 
         encodedParameters[0] = abi.encode(usdc, type(uint256).max, block.timestamp, signature);
-        encodedParameters[1] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()));
-        encodedParameters[2] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[1] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()));
+        encodedParameters[2] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
 
@@ -89,8 +89,8 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytesPackedOperations =
             abi.encodePacked(VaultRouter.Operations.ERC20_TransferFrom, VaultRouter.Operations.DepositCollateral);
         encodedParameters = new bytes[](2);
-        encodedParameters[0] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()));
-        encodedParameters[1] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[0] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()));
+        encodedParameters[1] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
     }
@@ -105,15 +105,15 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytes[] memory encodedParameters = new bytes[](2);
 
         ISignatureTransfer.PermitTransferFrom memory permit = ISignatureTransfer.PermitTransferFrom({
-            permitted: ISignatureTransfer.TokenPermissions({token: address(usdc), amount: 1_000 * (10 ** usdc.decimals())}),
+            permitted: ISignatureTransfer.TokenPermissions({token: address(usdc), amount: 1000 * (10 ** usdc.decimals())}),
             nonce: 0,
             deadline: block.timestamp
         });
         bytes32 dataHash = PermitHash.hash(permit, address(vaultRouter));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(user1PrivKey, _hashTypedData(dataHash));
         bytes memory signature = abi.encodePacked(r, s, v);
-        encodedParameters[0] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()), 0, block.timestamp, signature);
-        encodedParameters[1] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[0] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()), 0, block.timestamp, signature);
+        encodedParameters[1] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
     }
@@ -144,8 +144,8 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytes memory signature = abi.encodePacked(r, s, v);
         encodedParameters[0] =
             abi.encode(usdc, type(uint160).max, block.timestamp + 30 days, 0, block.timestamp, signature);
-        encodedParameters[1] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()));
-        encodedParameters[2] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[1] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()));
+        encodedParameters[2] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
 
@@ -162,8 +162,8 @@ contract PeripheryTests is BaseTest, Permit2_EIP712 {
         bytesPackedOperations =
             abi.encodePacked(VaultRouter.Operations.Permit2_TransferFrom, VaultRouter.Operations.DepositCollateral);
         encodedParameters = new bytes[](2);
-        encodedParameters[0] = abi.encode(usdc, 1_000 * (10 ** usdc.decimals()));
-        encodedParameters[1] = abi.encode(vault, usdc, 1_000 * (10 ** usdc.decimals()));
+        encodedParameters[0] = abi.encode(usdc, 1000 * (10 ** usdc.decimals()));
+        encodedParameters[1] = abi.encode(vault, usdc, 1000 * (10 ** usdc.decimals()));
 
         vaultRouter.multiInteract(bytesPackedOperations, encodedParameters);
     }
