@@ -1,5 +1,12 @@
 ## Protocol Periphery
 
+- MultiStaticCall Contract: Used for batching staticcall requests to reduce rpc calls offchain
+- VaultGetters Contract: Custom contract for calculating current data regarding a user's vault info and collateral info
+- VaultRouter Contract: Convenience wrapper used for batching calls to the vault contract
+
+  Note on VaultRouter `function multiInteract(bytes calldata _packedOperations, bytes[] calldata _encodedParameters)`:
+  An explainer to this is required to clarify how it expects calldata to be sent. - `_packedOperations` is a packed list of the enum Operations. Each byte represents an enum variant. This method is more optimized as using the solidity array data type would encode each enum variant that is 1 byte to 32 bytes meaning that users pay an extra 124 gas per variant. - `_encodedParameters` is an array of bytes that is expected to be abi.encoded.
+
 ### Deployment address
 
 #### Base Georli
