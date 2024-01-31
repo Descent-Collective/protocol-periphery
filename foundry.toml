@@ -9,4 +9,8 @@ base_georli= { key= "PLACEHOLDER_STRING", url='https://api-goerli.basescan.org'}
 
 [rpc_endpoints]
 base_georli = "${BASE_TESTNET_RPC_URL}"
+
+[fmt]
+number_underscore = "thousands"
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
