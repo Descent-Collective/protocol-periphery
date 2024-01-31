@@ -7,4 +7,3 @@
 [submodule "lib/protocol-core"]
 	path = lib/protocol-core
 	url = https://github.com/Descent-Collective/protocol-core
-	branch = protocol-improvements
