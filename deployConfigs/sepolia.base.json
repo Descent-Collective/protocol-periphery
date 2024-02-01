@@ -1,0 +1,5 @@
+{
+    "name": "Base Sepolia Testnet Deployment Config",
+    "USDC": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "xNGN": "0x5d0583Ef20884C0b175046d515Ec227200C12C89"
+}
