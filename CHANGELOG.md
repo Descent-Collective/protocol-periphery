@@ -85,7 +85,7 @@ Solidity compiler: [0.8.21]
 - Make `getCollateralInfo` to return the accumulated (base + collateral rate) rate per annum not collateral rate per second
 
 
-# Version Sepolia 0.1.0
+# Version Sepolia 0.2.0
 
 ## Compiler settings
 
