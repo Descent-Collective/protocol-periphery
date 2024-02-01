@@ -2,13 +2,15 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+fs_permissions = [{ access = "read", path = "./deployConfigs/localnet.json" }, { access = "read", path = "./deployConfigs/goerli.base.json" }, { access = "read", path = "./deployConfigs/sepolia.base.json" }]
 solc = "0.8.21"
 
 [etherscan]
 base_georli= { key= "PLACEHOLDER_STRING", url='https://api-goerli.basescan.org'}
 
 [rpc_endpoints]
-base_georli = "${BASE_TESTNET_RPC_URL}"
+base_georli = "${BASE_GOERLI_RPC_URL}"
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
 
 [fmt]
 number_underscore = "thousands"

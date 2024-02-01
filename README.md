@@ -17,6 +17,14 @@
 | VaultGetters Contract    | 0x63642E2E49922DA2095cFDB0781cFf01a0d69786 |
 | VaultRouter Contract     | 0x7FCF3897429Af4e5f3A397330AD638D819e53328 |
 
+#### Base Sepolia
+
+| Contract Name            | Addresses                                  |
+| ------------------------ | ------------------------------------------ |
+| MultiStaticCall Contract | 0x53D0ec27F7221535e72C11BA85BA1a1De34298c5 |
+| VaultGetters Contract    | 0x50fC21F951Bc42421815e104d21C5f094da9e70C |
+| VaultRouter Contract     | 0x7F46a4944F9C3ecF4Ea622364132b3fE9aBa1015 |
+
 To install libraries needed, run:
 
 ```zsh

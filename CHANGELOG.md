@@ -83,3 +83,21 @@ Solidity compiler: [0.8.21]
 
 - Fix `_getCollateralRatio` not accounting for the user's fees accrued since their accrued fees was last updated
 - Make `getCollateralInfo` to return the accumulated (base + collateral rate) rate per annum not collateral rate per second
+
+
+# Version Sepolia 0.1.0
+
+## Compiler settings
+
+Solidity compiler: [0.8.21]
+
+### contracts
+
+- MultiStaticCall Contract: `0x53D0ec27F7221535e72C11BA85BA1a1De34298c5`
+- VaultGetters Contract: `0x50fC21F951Bc42421815e104d21C5f094da9e70C`
+- VaultRouter Contract `0x7F46a4944F9C3ecF4Ea622364132b3fE9aBa1015`
+
+## Changes
+- Add router support for permit2 transferFrom, permit2 permit, permit2 permitTransferFrom, erc20 permit, erc20 transferFrom. To give more flexibility
+- Update protocol-core dependencies
+- Update vault-getters
