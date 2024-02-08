@@ -11,4 +11,3 @@ FOUNDRY_PROFILE=optimized forge build
 # Copy the production abis
 cp out/multiStaticcall.sol/MultiStaticcall.json $abis
 cp out/vaultGetters.sol/VaultGetters.json $abis
-cp out/src/vaultRouter.sol/VaultRouter.json $abis
