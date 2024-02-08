@@ -11,44 +11,34 @@ import {stdJson} from "forge-std/StdJson.sol";
 
 contract DeployScript is BaseScript {
     using stdJson for string;
+
     ERC20Token usdcAddress = getUsdc();
     Currency xNGNVault = getxNGN();
 
     function run()
         external
         broadcast
-        returns (
-            MultiStaticcall multiStaticcall,
-            VaultGetters vaultGetters,
-            VaultRouter vaultRouter
-        )
+        returns (MultiStaticcall multiStaticcall, VaultGetters vaultGetters, VaultRouter vaultRouter)
     {
-        if (address(usdcAddress) == address(0))
+        if (address(usdcAddress) == address(0)) {
             revert("USDC address not set, visit the deploy script and set it");
-        if (address(xNGNVault) == address(0))
-            revert(
-                "XNGN vault address not set, visit the deploy script and set it"
-            );
+        }
+        if (address(xNGNVault) == address(0)) {
+            revert("XNGN vault address not set, visit the deploy script and set it");
+        }
 
-        if (address(usdcAddress).code.length == 0)
-            revert(
-                "USDC address set is not a contract, it has no code deployed to it"
-            );
+        if (address(usdcAddress).code.length == 0) {
+            revert("USDC address set is not a contract, it has no code deployed to it");
+        }
         if (address(xNGNVault).code.length == 0) {
-            revert(
-                "XNGN vault address set is not a contract, it has no code deployed to it"
-            );
+            revert("XNGN vault address set is not a contract, it has no code deployed to it");
         }
 
         multiStaticcall = new MultiStaticcall();
         vaultGetters = new VaultGetters();
         vaultRouter = new VaultRouter();
 
-        vaultRouter.approveTokenForVault(
-            address(usdcAddress),
-            address(xNGNVault),
-            true
-        );
+        vaultRouter.approveTokenForVault(address(usdcAddress), address(xNGNVault), true);
     }
 
     function getUsdc() private returns (ERC20Token usdc) {
