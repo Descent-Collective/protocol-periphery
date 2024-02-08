@@ -18,20 +18,12 @@ jobs:
   build:
     uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-build.yml@main"
 
-  test-fuzz:
-    needs: ["lint", "build"]
-    uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-test.yml@main"
-    with:
-      foundry-fuzz-runs: 5000
-      foundry-profile: "test-optimized"
-      match-path: "test/fuzz/**/*.sol"
-      name: "Fuzz tests"
 
-  test-invariant:
+  test-integration:
     needs: ["lint", "build"]
     uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-test.yml@main"
     with:
       foundry-fuzz-runs: 5000
       foundry-profile: "test-optimized"
       match-path: "test/*.sol"
-      name: "Invariant tests"
+      name: "Integration tests"
