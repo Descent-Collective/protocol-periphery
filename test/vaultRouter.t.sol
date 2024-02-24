@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {VaultGetters} from "../src/vaultGetters.sol";
-import {VaultRouter, ERC20} from "../src/VaultRouter.sol";
+import {VaultRouter, ERC20} from "../src/vaultRouter.sol";
 import {MultiStaticcall} from "../src/multiStaticcall.sol";
 import {BaseTest, IVault, Vault} from "lib/protocol-core/test/base.t.sol";
 import {IPermit2, ISignatureTransfer, IAllowanceTransfer} from "permit2/interfaces/IPermit2.sol";

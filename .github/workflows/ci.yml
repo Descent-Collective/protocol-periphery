@@ -1,0 +1,29 @@
+name: "CI"
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{github.workflow}}-${{github.ref}}
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  lint:
+    uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-lint.yml@main"
+
+  build:
+    uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-build.yml@main"
+
+
+  test-integration:
+    needs: ["lint", "build"]
+    uses: "Descent-Collective/reusable-workflows/.github/workflows/forge-test.yml@main"
+    with:
+      foundry-fuzz-runs: 5000
+      foundry-profile: "test-optimized"
+      match-path: "test/*.sol"
+      name: "Integration tests"

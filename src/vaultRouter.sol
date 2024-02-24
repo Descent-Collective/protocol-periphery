@@ -20,6 +20,7 @@ contract VaultRouter is Ownable {
     }
 
     enum Operations {
+        // Invalid operation
         Invalid,
         // Vault operations
         DepositCollateral,
